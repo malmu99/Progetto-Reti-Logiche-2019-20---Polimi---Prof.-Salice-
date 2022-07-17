@@ -1,0 +1,175 @@
+----------------------------------------------------------------------------------
+-- Company: 
+-- Engineer: 
+-- 
+-- Create Date: 27.02.2020 21:24:26
+-- Design Name: 
+-- Module Name: Prova - Behavioral
+-- Project Name: 
+-- Target Devices: 
+-- Tool Versions: 
+-- Description: 
+-- 
+-- Dependencies: 
+-- 
+-- Revision:
+-- Revision 0.01 - File Created
+-- Additional Comments:
+-- 
+----------------------------------------------------------------------------------
+
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.math_real.all;
+
+
+-- Uncomment the following library declaration if using
+-- arithmetic functions with Signed or Unsigned values
+--use IEEE.NUMERIC_STD.ALL;
+
+-- Uncomment the following library declaration if instantiating
+-- any Xilinx leaf cells in this code.
+--library UNISIM;
+--use UNISIM.VComponents.all;
+
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
+USE ieee.numeric_std.all;
+
+
+
+entity project_reti_logiche is 
+    port ( 
+        i_clk : in std_logic; 
+        i_start : in std_logic; 
+        i_rst : in std_logic; 
+        i_data : in std_logic_vector(7 downto 0);
+        o_address : out std_logic_vector(15 downto 0); 
+        o_done : out std_logic; 
+        o_en : out std_logic; 
+        o_we : out std_logic; 
+        o_data : out std_logic_vector (7 downto 0)
+         ); 
+                end project_reti_logiche;
+
+architecture Behavioral of project_reti_logiche is
+    type state_type is (s0 ,s1,s2, s3, s4, s5,s6,s7,s8,final,done,aspe);
+    signal next_state       :state_type;
+    signal indirizzo        :integer;
+    signal lettura          :integer :=0;
+    signal confronto        :integer;
+    signal offset           :integer:=0;
+    signal diff             :integer:=0;
+    
+  
+    
+    
+
+begin
+    process(i_clk, i_rst)
+    begin
+    
+        if (i_rst= '1') then
+            o_done      <= '0';
+            o_data      <= (others =>'0');
+            o_en        <= '1';
+            o_we        <= '0';
+            o_address   <= STD_LOGIC_VECTOR(TO_UNSIGNED(8, 16));
+            next_state  <= s0;
+            lettura     <= 0;
+        
+        -- resetta 
+        
+        elsif (i_clk'event and i_clk='1') then     
+            case next_state is
+                    
+                when s0=>
+                        if(i_start= '1') then
+                                o_address   <= STD_LOGIC_VECTOR(TO_UNSIGNED(8, 16));
+                                o_data      <= (others =>'0');
+                                lettura<= 0;
+                                next_state <= s1;
+                        else
+                                next_state<= s0;
+                        end if;
+                        
+                when s1=>  
+                        o_address <= std_logic_vector(to_unsigned(8,16));
+                        next_state <= s2;
+                        
+                when s2=>
+                        indirizzo <= to_integer(unsigned(i_data));
+                        next_state <= s3;
+                
+                when s3=>
+                            o_address <= std_logic_vector(to_unsigned(0,16));
+                            next_state<=aspe;
+                when aspe=>
+                    next_state<=s4;
+                           
+
+                when s4=>
+                        confronto<= to_integer(unsigned(i_data));
+                        lettura<= lettura+1;
+                        next_state<= s5;
+                        
+               -- when aspe2=>
+                 --       next_state<= s5;
+                        
+                when s5=>
+                       
+                        if   ( confronto+3 >= indirizzo) and ( indirizzo >= confronto) then
+                                if (lettura=1) then
+                                    lettura<=lettura-1;
+                                    next_state <=s6;
+                                    
+                                else
+                                    lettura<=lettura-2;
+                                    next_state <=s6;
+                                end if;
+                                    
+            
+                        else 
+                            if   (lettura<9) then
+                                    
+                                    o_address <= std_logic_vector(to_unsigned(lettura,16));
+                                    next_state <=s4;
+                            else
+                                    o_we <= '1';
+                                    o_address<=std_logic_vector(to_unsigned(9,16));
+                                    next_state  <=s7;
+                            end if;
+                        end if;
+                        
+                when s6=>
+                        diff <= indirizzo-confronto;
+                         o_we <= '1';
+                         o_address<=std_logic_vector(to_unsigned(9,16));
+                        next_state<= s8;
+                        
+                when s8=>
+                        o_data <= ('1' & std_logic_vector(to_unsigned(lettura,3)) & std_logic_vector(to_unsigned(2 ** diff,4)));
+                        next_state <= final;
+                        
+                when s7=>
+                        
+                        o_data <= ('0' & std_logic_vector(to_unsigned(indirizzo,7)));
+                        next_state <=final;
+                    
+                           
+                when final=>
+                    o_done <='1';
+                    o_we <= '0';
+                    next_state <=done;  
+                    
+                when done =>
+                    o_done<='0';
+                    next_state<= s0;
+                    
+                            
+
+            end case;
+        end if;
+    end process;
+end Behavioral;
