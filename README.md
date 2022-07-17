@@ -13,4 +13,6 @@ Realizzato da:
 Link utili:
    *  [Regole Progetto](https://github.com/malmu99/Progetto-Reti-Logiche-2019-20---Polimi---Prof.-Salice-/blob/main/Specifiche%20e%20Regole/Regole%20Progetto.pdf)
    *  [Specifica Progetto](https://github.com/malmu99/Progetto-Reti-Logiche-2019-20---Polimi---Prof.-Salice-/blob/main/Specifiche%20e%20Regole/Specifica%20Progetto.pdf)
+   *  [Codice e Test Benches](https://github.com/malmu99/Progetto-Reti-Logiche-2019-20---Polimi---Prof.-Salice-/tree/main/Codice%20e%20Test%20Benches)
+   *  [Report Finale](https://github.com/malmu99/Progetto-Reti-Logiche-2019-20---Polimi---Prof.-Salice-/blob/main/Report%20Finale.pdf)
 
